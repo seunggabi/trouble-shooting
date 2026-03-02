@@ -31,7 +31,7 @@ $ crontab -e
 
 ```bash
 # crontab -e
-* * * * * /bin/zsh -c '/path/to/script.sh'
+* * * * * source ~/.zshrc && /path/to/script.sh
 ```
 
 **`/bin/zsh -c`는 자동으로 `~/.zshrc`를 로드합니다.**
@@ -53,7 +53,7 @@ export PATH="/usr/local/bin:$PATH"
 **중요 사항:**
 - `.zshenv` 설정은 불필요
 - Crontab 상단의 `SHELL=/bin/zsh`도 불필요
-- Crontab에서 환경 변수를 설정할 수 없으므로, `/bin/zsh -c 'source ~/.zshrc && ...'`로 직접 호출
+- Crontab에서 환경 변수를 설정할 수 없으므로, `source ~/.zshrc && ...`로 직접 호출
 
 ## 실제 예제
 
@@ -61,13 +61,13 @@ export PATH="/usr/local/bin:$PATH"
 # crontab -e
 
 # 매일 자정에 실행
-0 0 * * * /bin/zsh -c '~/projects/script.sh'
+0 0 * * * source ~/.zshrc && ~/projects/script.sh
 
 # 1시간마다 실행
-0 * * * * /bin/zsh -c '~/projects/task.sh >> ~/logs/task.log 2>&1'
+0 * * * * source ~/.zshrc && ~/projects/task.sh >> ~/logs/task.log 2>&1
 
 # 매시 33분에 실행 (cd 필요시)
-33 * * * * /bin/zsh -c 'cd ~/projects && npm run task'
+33 * * * * source ~/.zshrc && cd ~/projects && npm run task
 ```
 
 **이것이 전부입니다.** `source ~/.zshrc`, `SHELL=/bin/zsh`, 래퍼 스크립트, 추가 env 변수 모두 불필요.
@@ -79,10 +79,10 @@ export PATH="/usr/local/bin:$PATH"
 ```bash
 # crontab -e
 # 환경 로그 저장
-0 0 * * * /bin/zsh -c 'env > /tmp/cron-env.log 2>&1'
+0 0 * * * source ~/.zshrc && env > /tmp/cron-env.log 2>&1
 
 # PATH 확인
-0 0 * * * /bin/zsh -c 'echo "PATH=$PATH" >> /tmp/cron-test.log'
+0 0 * * * source ~/.zshrc && echo "PATH=$PATH" >> /tmp/cron-test.log
 ```
 
 스크립트 실행 권한 확인:
@@ -95,14 +95,14 @@ chmod +x ~/projects/script.sh
 
 | 항목 | 방법 |
 |------|--------|
-| **Cron에서 zshrc 자동 로드** | `/bin/zsh -c 'script'` |
+| **Cron에서 zshrc 자동 로드** | `source ~/.zshrc && script` |
 | **필요 없는 것** | `source ~/.zshrc`, `SHELL=/bin/zsh`, 래퍼, env 설정 |
 
 ## 핵심 교훈
 
 **유일한 방법:**
 ```bash
-* * * * * /bin/zsh -c '/path/to/script.sh'
+* * * * * source ~/.zshrc && /path/to/script.sh
 ```
 
 **특징:**
