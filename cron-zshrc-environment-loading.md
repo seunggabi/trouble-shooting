@@ -27,16 +27,17 @@ $ crontab -e
   - `.zshenv`: 모든 Zsh 인스턴스에서 로드 (login/non-login 상관없음)
   - `.zshrc`: interactive shell에서만 로드
 
-## 해결: Cron에서 Zsh 환경 로드
-
-### 권장: Cron에서 명시적으로 Zsh 지정 (가장 간단)
+## 해결: `/bin/zsh -c`로 실행
 
 ```bash
 # crontab -e
-* * * * * /bin/zsh -c 'source ~/.zshrc && /path/to/script.sh'
+* * * * * /bin/zsh -c '/path/to/script.sh'
 ```
 
-이것이 유일하게 필요한 방식입니다. `SHELL=/bin/zsh` 설정이나 래퍼 스크립트는 불필요합니다.
+**`/bin/zsh -c`는 자동으로 `~/.zshrc`를 로드합니다.**
+- `source ~/.zshrc` 명시적 호출 불필요
+- `SHELL=/bin/zsh` 설정 불필요
+- 래퍼 스크립트 불필요
 
 ### 환경 변수 설정
 
@@ -60,16 +61,16 @@ export PATH="/usr/local/bin:$PATH"
 # crontab -e
 
 # 매일 자정에 실행
-0 0 * * * /bin/zsh -c 'source ~/.zshrc && ~/projects/script.sh'
+0 0 * * * /bin/zsh -c '~/projects/script.sh'
 
 # 1시간마다 실행
-0 * * * * /bin/zsh -c 'source ~/.zshrc && ~/projects/task.sh >> ~/logs/task.log 2>&1'
+0 * * * * /bin/zsh -c '~/projects/task.sh >> ~/logs/task.log 2>&1'
 
-# 매시 33분에 실행
-33 * * * * /bin/zsh -c 'source ~/.zshrc && cd ~/projects && npm run task'
+# 매시 33분에 실행 (cd 필요시)
+33 * * * * /bin/zsh -c 'cd ~/projects && npm run task'
 ```
 
-**이것이 모든 것입니다.** `SHELL=/bin/zsh`, 래퍼 스크립트, 추가 env 변수 설정 불필요.
+**이것이 전부입니다.** `source ~/.zshrc`, `SHELL=/bin/zsh`, 래퍼 스크립트, 추가 env 변수 모두 불필요.
 
 ## 트러블슈팅
 
@@ -78,43 +79,35 @@ export PATH="/usr/local/bin:$PATH"
 ```bash
 # crontab -e
 # 환경 로그 저장
-0 0 * * * /bin/zsh -c 'source ~/.zshrc && env > /tmp/cron-env.log 2>&1'
+0 0 * * * /bin/zsh -c 'env > /tmp/cron-env.log 2>&1'
 
-# 또는 직접 확인
-0 0 * * * /bin/zsh -c 'source ~/.zshrc && echo "PATH=$PATH" >> /tmp/cron-test.log'
+# PATH 확인
+0 0 * * * /bin/zsh -c 'echo "PATH=$PATH" >> /tmp/cron-test.log'
 ```
 
 스크립트 실행 권한 확인:
 
 ```bash
-chmod +x ~/sg/blog/sh/key.sh
+chmod +x ~/projects/script.sh
 ```
 
 ## 요약
 
-| 항목 | 답변 |
+| 항목 | 방법 |
 |------|--------|
-| **Cron에서 zshrc 로드** | `/bin/zsh -c 'source ~/.zshrc && script'` |
-| **.zshenv 설정** | **불필요** — `.zshrc`로 충분 |
-| **`SHELL=/bin/zsh` crontab 설정** | **불필요** |
-| **래퍼 스크립트** | **불필요** |
-| **Cron env 변수 설정** | **불필요** |
+| **Cron에서 zshrc 자동 로드** | `/bin/zsh -c 'script'` |
+| **필요 없는 것** | `source ~/.zshrc`, `SHELL=/bin/zsh`, 래퍼, env 설정 |
 
 ## 핵심 교훈
 
-**가장 간단한 방법:**
+**유일한 방법:**
 ```bash
-* * * * * /bin/zsh -c 'source ~/.zshrc && /path/to/script.sh'
+* * * * * /bin/zsh -c '/path/to/script.sh'
 ```
 
-**제거할 것들:**
-- `SHELL=/bin/zsh` — crontab에서 불필요
-- 래퍼 스크립트 — `/bin/zsh -c` 직접 사용하면 됨
-- `.zshenv` 설정 — `.zshrc`로 충분
-- cron env 변수 설정 — 없어도 작동
-
-**확인하기:**
-```bash
-# 환경 변수 로드 확인
-* * * * * /bin/zsh -c 'source ~/.zshrc && env > /tmp/cron-env.log 2>&1'
-```
+**특징:**
+- `/bin/zsh -c`는 자동으로 `~/.zshrc` 로드
+- `source ~/.zshrc` 불필요
+- `SHELL=/bin/zsh` 설정 불필요
+- 래퍼 스크립트 불필요
+- crontab env 변수 설정 불필요
