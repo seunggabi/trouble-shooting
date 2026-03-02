@@ -27,15 +27,15 @@ $ crontab -e
   - `.zshenv`: 모든 Zsh 인스턴스에서 로드 (login/non-login 상관없음)
   - `.zshrc`: interactive shell에서만 로드
 
-## 해결: `/bin/zsh -c`로 실행
+## 해결: `source ~/.zshrc &&`로 실행
 
 ```bash
 # crontab -e
 * * * * * source ~/.zshrc && /path/to/script.sh
 ```
 
-**`/bin/zsh -c`는 자동으로 `~/.zshrc`를 로드합니다.**
-- `source ~/.zshrc` 명시적 호출 불필요
+**`source ~/.zshrc &&`를 사용하여 명시적으로 zshrc를 로드합니다.**
+- `source ~/.zshrc`를 각 cron 명령 앞에 추가
 - `SHELL=/bin/zsh` 설정 불필요
 - 래퍼 스크립트 불필요
 
@@ -106,8 +106,8 @@ chmod +x ~/projects/script.sh
 ```
 
 **특징:**
-- `/bin/zsh -c`는 자동으로 `~/.zshrc` 로드
-- `source ~/.zshrc` 불필요
+- `source ~/.zshrc &&`로 명시적 로드
 - `SHELL=/bin/zsh` 설정 불필요
 - 래퍼 스크립트 불필요
 - crontab env 변수 설정 불필요
+- 모든 cron 명령 앞에 `source ~/.zshrc &&` 추가
